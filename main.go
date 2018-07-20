@@ -12,9 +12,9 @@ package main
 
 import (
 	"flag"
-	cfg "github.ibm.com/alchemy-containers/armada-px-integration/utils/config"
-        "github.ibm.com/alchemy-containers/armada-px-integration/watcher"
-        "github.ibm.com/alchemy-containers/armada-px-integration/utils/logger"
+	cfg "github.ibm.com/alchemy-containers/block-storage-attacher/utils/config"
+        "github.ibm.com/alchemy-containers/block-storage-attacher/watcher"
+        "github.ibm.com/alchemy-containers/block-storage-attacher/utils/logger"
 	"go.uber.org/zap"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"

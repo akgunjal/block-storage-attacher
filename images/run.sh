@@ -29,6 +29,6 @@ ln -s -f /lib/systemd/system/ibmc-portworx.service /host/etc/systemd/system/mult
 
 /home/armada-storage/systemutil -action reload
 /home/armada-storage/systemutil -target ibmc-portworx.service -action start
-/home/armada-storage/armada-px-integration
+/home/armada-storage/block-storage-attacher
 
 set +ex

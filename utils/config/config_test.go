@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/stretchr/testify/assert"
-	"github.ibm.com/alchemy-containers/armada-storage-file-plugin/utils/logger"
+	"github.ibm.com/alchemy-containers/block-storage-attacher/utils/logger"
 	"os"
 	"path/filepath"
 	"testing"

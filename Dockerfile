@@ -12,8 +12,8 @@ RUN chmod 775 /home/armada-storage/systemutil
 RUN chmod 775 /home/armada-storage/run.sh
 RUN chmod 775 /home/armada-storage/iscsi-attach.sh
 
-COPY armada-px-integration /home/armada-storage
-RUN chmod +x /home/armada-storage/armada-px-integration
+COPY block-storage-attacher /home/armada-storage
+RUN chmod +x /home/armada-storage/block-storage-attacher
 
 CMD ./home/armada-storage/run.sh
-#ENTRYPOINT ["/home/armada-storage/armada-px-integration"]
+#ENTRYPOINT ["/home/armada-storage/block-storage-attacher"]
