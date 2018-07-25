@@ -1,5 +1,5 @@
 hash: 30ee551d41b101645410e73ecc742e842327bf74b371d0a3c56f763444a96277
-updated: 2018-06-12T13:02:43.963028+05:30
+updated: 2018-07-25T13:38:17.510138+05:30
 imports:
 - name: github.com/BurntSushi/toml
   version: bbd5bb678321a0d6e58f1099321dfa73391c1b6f
@@ -275,8 +275,3 @@ testImports:
   version: e3a8ff8ce36581f87a15341206f205b1da467059
   subpackages:
   - assert
-- name: github.ibm.com/alchemy-containers/armada-storage-file-plugin
-  version: d5b4c12e235aa32a5a11262e313b0ae57ba8f268
-  subpackages:
-  - utils/crn
-  - utils/logger
