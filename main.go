@@ -13,8 +13,8 @@ package main
 import (
 	"flag"
 	cfg "github.ibm.com/alchemy-containers/block-storage-attacher/utils/config"
-        "github.ibm.com/alchemy-containers/block-storage-attacher/watcher"
-        "github.ibm.com/alchemy-containers/block-storage-attacher/utils/logger"
+	"github.ibm.com/alchemy-containers/block-storage-attacher/utils/logger"
+	"github.ibm.com/alchemy-containers/block-storage-attacher/watcher"
 	"go.uber.org/zap"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
