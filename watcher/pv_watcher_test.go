@@ -29,6 +29,7 @@ import (
 	//"k8s.io/client-go/pkg/api/v1"
 	"k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/fake"
+        "github.com/stretchr/testify/assert"
 	//"k8s.io/client-go/tools/cache"
 	//"strconv"
 	//"strings"
@@ -39,24 +40,12 @@ import (
 	"testing"
 )
 
-//var lgr, _ = logger.GetZapLogger()
 
 var SUBNET_CONFIG = "subnetconfig"
 var SUBNET_NS = "ibm_namespace"
 
-//var clientset kubernetes.Interface
 const annDynamicallyProvisioned = "pv.kubernetes.io/provisioned-by"
 
-/*func TestWatchPersistentVolumes(t *testing.T) {
-
-       lgr.Info("Testing WatchPersistentVolumes")
-
-       pv := newVolumeType("volume-1")
-       objs := []runtime.Object{pv}
-       clientset = fake.NewSimpleClientset(objs...)
-
-       WatchPersistentVolumes(clientset,*lgr)
-}*/
 
 func TestAttachVolume(t *testing.T) {
 
@@ -168,42 +157,12 @@ func TestValidate(t *testing.T) {
 	objs := []runtime.Object{pv}
 	clientset = fake.NewSimpleClientset(objs...)
 
-	Validate(pv)
+	err := Validate(pv)
+        assert.NotNil(t,err)
 	os.RemoveAll("/host/etc/iscsi-portworx-volume.conf")
 
 }
 
-/*
-func newConfigMapType2(namespace, configName string) *v1.ConfigMap {
-	configMap := &v1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      configName,
-		},
-		Data: map[string]string{
-			subnetData: string([]byte(`[{"id": 1294657, "cidrs": "10.130.233.192/26", "region": "region1", "zone": "zone1"}]`)),
-		},
-	}
-	return configMap
-}
-
-
-func getClientsetWithConfigMap() kubernetes.Interface {
-
-	configMap := newConfigMapType2(SUBNET_NS, SUBNET_CONFIG)
-	os.Setenv("POD_NAMESPACE", SUBNET_NS)
-	os.Setenv("CM_SUBNET", SUBNET_CONFIG)
-
-	//create a clientset with configMap
-	objs := []runtime.Object{configMap}
-
-	//create clientset and initialize the global variable "clientset"
-	clientset := fake.NewSimpleClientset(objs...)
-
-	return clientset
-}
-
-*/
 func newVolumeType(name string) *v1.PersistentVolume {
 	//Create a volume
 	labels := map[string]string{}
