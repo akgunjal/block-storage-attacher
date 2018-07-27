@@ -10,11 +10,13 @@
 IMAGE = registry.ng.bluemix.net/akgunjal/armada-block-volume-attacher
 #registry.ng.bluemix.net/akgunjal/armada-storage-portworx-volume-attacher
 #armada-master/armada-storage-portworx-volume-attacher
+GOPACKAGES=$(shell go list ./... | grep -v /vendor/ | grep -v /cmd)
+GOFILES=$(shell find . -type f -name '*.go' -not -path "./vendor/*")
 VERSION := latest
 SYSTEMUTIL_DIR=vendor/github.ibm.com/alchemy-containers/ibmc-storage-common-resources-lib
 
 .PHONY: all
-all: driver
+all: deps fmt vet buildgo test buildimage
 
 .PHONY: driver
 driver: deps buildgo buildimage
@@ -23,10 +25,30 @@ driver: deps buildgo buildimage
 deps:
 	echo "Installing dependencies ..."
 	glide install --strip-vendor
+	go get github.com/pierrre/gotestcover
+
+.PHONY: fmt
+fmt:
+	gofmt -l ${GOFILES}
+	@if [ -n "$$(gofmt -l ${GOFILES})" ]; then echo 'Above Files needs gofmt fixes. Please run gofmt -l -w on your code.' && exit 1; fi
+
+.PHONY: vet
+vet:
+	go vet ${GOPACKAGES}
+
 
 .PHONY: buildgo
 buildgo:
 	GOOS=linux GOARCH=amd64 go build
+.PHONY: test
+test:
+	#$(GOPATH)/bin/gotestcover -v -race -coverprofile=cover.out ${GOPACKAGES}
+	$(GOPATH)/bin/gotestcover -v -race -coverprofile=cover.out ${GOPACKAGES}
+
+.PHONY: coverage
+coverage:
+	go tool cover -html=cover.out -o=cover.html
+
 
 .PHONY: build-driver-image
 buildimage:

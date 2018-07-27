@@ -6,42 +6,42 @@ import (
 	"github.com/coreos/go-systemd/dbus"
 	"github.ibm.com/alchemy-containers/block-storage-attacher/utils/config"
 	"go.uber.org/zap"
-	"k8s.io/apimachinery/pkg/util/wait"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
 	//types "k8s.io/apimachinery/pkg/types"
 	//"k8s.io/client-go/pkg/api/v1"
+	"io/ioutil"
 	"k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/cache"
+	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
-	"io/ioutil"
-	"os"
-	"regexp"
 )
 
 const (
 	ATTACHSTATUS = "ibm.io/attachstatus"
-	IQN = "ibm.io/iqn"
-	USERNAME = "ibm.io/username"
-	PASSWORD = "ibm.io/password"
-	TARGET = "ibm.io/targetip"
-	LUNID = "ibm.io/lunid"
-	NODEIP    = "ibm.io/nodeip"
-	DMPATH = "ibm.io/dm"
-	MULTIPATH = "ibm.io/mpath"
-	ATTACH = "attach"
-	DETACH = "detach"
+	IQN          = "ibm.io/iqn"
+	USERNAME     = "ibm.io/username"
+	PASSWORD     = "ibm.io/password"
+	TARGET       = "ibm.io/targetip"
+	LUNID        = "ibm.io/lunid"
+	NODEIP       = "ibm.io/nodeip"
+	DMPATH       = "ibm.io/dm"
+	MULTIPATH    = "ibm.io/mpath"
+	ATTACH       = "attach"
+	DETACH       = "detach"
 
-	STORAGECLASS   = "pxclass"
+	STORAGECLASS     = "pxclass"
 	STATUS_ATTACHING = "attaching"
-	STATUS_ATTACHED = "attached"
-	STATUS_FAILED = "failed"
-	PX_CONF = "/host/etc/iscsi-portworx-volume.conf"
-	PX_SERVICE = "ibmc-portworx.service"
+	STATUS_ATTACHED  = "attached"
+	STATUS_FAILED    = "failed"
+	PX_CONF          = "/host/etc/iscsi-portworx-volume.conf"
+	PX_SERVICE       = "ibmc-portworx.service"
 )
 
 var clientset kubernetes.Interface
@@ -60,8 +60,8 @@ func WatchPersistentVolumes(client kubernetes.Interface, log zap.Logger) {
 	}
 	_, controller := cache.NewInformer(volumeSource, &v1.PersistentVolume{}, time.Second*0,
 		cache.ResourceEventHandlerFuncs{
-			AddFunc:    attachVolume,
-			DeleteFunc: detachVolume,
+			AddFunc:    AttachVolume,
+			DeleteFunc: DetachVolume,
 			UpdateFunc: nil,
 		},
 	)
@@ -71,7 +71,7 @@ func WatchPersistentVolumes(client kubernetes.Interface, log zap.Logger) {
 	<-stopch
 }
 
-func attachVolume(obj interface{}) {
+func AttachVolume(obj interface{}) {
 	pv, ok := obj.(*v1.PersistentVolume)
 	if !ok {
 		lgr.Error("Error in reading watcher event data of persistent volume")
@@ -81,13 +81,13 @@ func attachVolume(obj interface{}) {
 		lgr.Info("Persistent volume does not belong to storage class: ", zap.String("Name", pv.Name), zap.String("Storage_Class", pv.Spec.StorageClassName))
 		return
 	}
-	modifyAttachConfig(pv)
+	ModifyAttachConfig(pv)
 }
 
-func modifyAttachConfig(pv *v1.PersistentVolume) {
+func ModifyAttachConfig(pv *v1.PersistentVolume) {
 	lgr.Info("Volume to be attached: ", zap.String("Name", pv.Name))
 
-	validateErr := validate(pv)
+	validateErr := Validate(pv)
 	if validateErr != nil {
 		lgr.Error("", zap.Error(validateErr))
 		return
@@ -99,9 +99,9 @@ func modifyAttachConfig(pv *v1.PersistentVolume) {
 	volume.Target = pv.Annotations[TARGET]
 	volume.Lunid, _ = strconv.Atoi(pv.Annotations[LUNID])
 	volume.Nodeip = pv.Annotations[NODEIP]
-	
+
 	worker_node := os.Getenv("NODE_IP")
-	if(worker_node != volume.Nodeip) {
+	if worker_node != volume.Nodeip {
 		lgr.Info("The volume attach is not requested for this worker node")
 		return
 	}
@@ -140,7 +140,7 @@ func modifyAttachConfig(pv *v1.PersistentVolume) {
 	}
 
 	pvUpdated := false
-	for x := 0; x <5; x++ {
+	for x := 0; x < 5; x++ {
 		//Adding sleep since kubernetes will be still modifying the PV object
 		time.Sleep(5 * time.Second)
 
@@ -166,7 +166,7 @@ func modifyAttachConfig(pv *v1.PersistentVolume) {
 	if !pvUpdated {
 		return
 	}
-		
+
 	// Restart ibmc-portworx service so volume can be attached
 	dbConn, connErr := dbus.New()
 	if connErr != nil {
@@ -186,10 +186,10 @@ func modifyAttachConfig(pv *v1.PersistentVolume) {
 		lgr.Error("Error: Restart of service is not done: " + job)
 		return
 	}
-	updatePersistentVolume(volume, pv)
+	UpdatePersistentVolume(volume, pv)
 }
 
-func updatePersistentVolume(volume config.Volume, pv *v1.PersistentVolume) {
+func UpdatePersistentVolume(volume config.Volume, pv *v1.PersistentVolume) {
 	pathsFile := "/host/lib/ibmc-portworx/out_paths"
 	mpathsFile := "/host/lib/ibmc-portworx/out_multipaths"
 	var fileExists bool
@@ -198,24 +198,24 @@ func updatePersistentVolume(volume config.Volume, pv *v1.PersistentVolume) {
 	var lunid int
 
 	//Waiting for 625 secs here as the iscsi-attach script has a wait time of 600secs in total for the volume attach to finish
-	for x := 0; x <125; x++ {
+	for x := 0; x < 125; x++ {
 		_, err1 := os.Stat(pathsFile)
 		_, err2 := os.Stat(mpathsFile)
 		if (!os.IsNotExist(err1)) && (!os.IsNotExist(err2)) {
 			fileExists = true
-        	break
-    	}
-    	time.Sleep(5 * time.Second)
+			break
+		}
+		time.Sleep(5 * time.Second)
 	}
-	
+
 	if fileExists {
 		var input []byte
 		var err error
 		//Parse paths to fetch lun id as per below command and output
 		/* multipathd show paths format "%w %i"
-			uuid                              hcil     
-			3600a09803830445455244c4a38752d30 10:0:0:15  --> The last part of hcil is lun id
-			3600a09803830445455244c4a38752d30 11:0:0:15
+		uuid                              hcil
+		3600a09803830445455244c4a38752d30 10:0:0:15  --> The last part of hcil is lun id
+		3600a09803830445455244c4a38752d30 11:0:0:15
 		*/
 		if input, err = ioutil.ReadFile(pathsFile); err != nil {
 			lgr.Error("Could not read " + pathsFile + " file")
@@ -236,11 +236,11 @@ func updatePersistentVolume(volume config.Volume, pv *v1.PersistentVolume) {
 				}
 			}
 		}
-		
+
 		// Parse multipaths to fetch device path
 		/* multipathd show multipaths
-			name                              sysfs uuid                             
-			3600a09803830445455244c4a38752d30 dm-0  3600a09803830445455244c4a38752d30
+		name                              sysfs uuid
+		3600a09803830445455244c4a38752d30 dm-0  3600a09803830445455244c4a38752d30
 		*/
 		if input, err = ioutil.ReadFile(mpathsFile); err != nil {
 			lgr.Error("Could not read " + mpathsFile + " file")
@@ -260,19 +260,19 @@ func updatePersistentVolume(volume config.Volume, pv *v1.PersistentVolume) {
 			}
 		}
 		lgr.Info("Device path and volume lun ID: ", zap.String("LUN_Id", strconv.Itoa(volume.Lunid)), zap.String("Device_Path", devicepath))
-		
+
 		// Delete the output files
 		del_err := os.Remove(pathsFile)
 		if del_err != nil {
-			lgr.Error("Delete of " + pathsFile + " file failed ", zap.Error(del_err))
-		}
-		
-		del_err = os.Remove(mpathsFile)
-		if del_err != nil {
-			lgr.Error("Delete of " + mpathsFile + " file failed ", zap.Error(del_err))
+			lgr.Error("Delete of "+pathsFile+" file failed ", zap.Error(del_err))
 		}
 
-		for x := 0; x <5; x++ {
+		del_err = os.Remove(mpathsFile)
+		if del_err != nil {
+			lgr.Error("Delete of "+mpathsFile+" file failed ", zap.Error(del_err))
+		}
+
+		for x := 0; x < 5; x++ {
 			//Adding sleep since kubernetes will be still modifying the PV object
 			time.Sleep(5 * time.Second)
 
@@ -290,7 +290,7 @@ func updatePersistentVolume(volume config.Volume, pv *v1.PersistentVolume) {
 		}
 		return
 	}
-	for x := 0; x <5; x++ {
+	for x := 0; x < 5; x++ {
 		//Adding sleep since kubernetes will be still modifying the PV object
 		time.Sleep(5 * time.Second)
 
@@ -305,7 +305,7 @@ func updatePersistentVolume(volume config.Volume, pv *v1.PersistentVolume) {
 	}
 }
 
-func validate(pv *v1.PersistentVolume) error {
+func Validate(pv *v1.PersistentVolume) error {
 	volDetails := make([]string, 0)
 	if pv.Annotations == nil {
 		lgr.Error("The PV has no volume details given to perform attach.")
@@ -344,7 +344,7 @@ func validate(pv *v1.PersistentVolume) error {
 	if pv.Annotations[ATTACHSTATUS] == STATUS_FAILED {
 		lgr.Warn("Either no annotations are given or the following volume attributes are not valid in the PV:", zap.Strings("vol_attach_attrs", volDetails))
 
-		for x := 0; x <5; x++ {
+		for x := 0; x < 5; x++ {
 			time.Sleep(5 * time.Second)
 
 			//Fetch the latest version of the PV from Kubernetes apiserver
@@ -361,7 +361,7 @@ func validate(pv *v1.PersistentVolume) error {
 	return nil
 }
 
-func detachVolume(obj interface{}) {
+func DetachVolume(obj interface{}) {
 	pv, ok := obj.(*v1.PersistentVolume)
 	if !ok {
 		lgr.Error("Error in reading watcher event data of persistent volume")
@@ -371,10 +371,10 @@ func detachVolume(obj interface{}) {
 		lgr.Info("Persistent volume does not belong to storage class: ", zap.String("Name", pv.Name), zap.String("Storage_Class", pv.Spec.StorageClassName))
 		return
 	}
-	modifyDetachConfig(pv)
+	ModifyDetachConfig(pv)
 }
 
-func modifyDetachConfig(pv *v1.PersistentVolume) {
+func ModifyDetachConfig(pv *v1.PersistentVolume) {
 	lgr.Info("Volume to be detached: ", zap.String("Name", pv.Name))
 
 	volDetails := make([]string, 0)
