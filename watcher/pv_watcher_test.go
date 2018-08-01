@@ -27,9 +27,9 @@ import (
 	//"k8s.io/client-go/kubernetes"
 	//types "k8s.io/apimachinery/pkg/types"
 	//"k8s.io/client-go/pkg/api/v1"
+	"github.com/stretchr/testify/assert"
 	"k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/fake"
-        "github.com/stretchr/testify/assert"
 	//"k8s.io/client-go/tools/cache"
 	//"strconv"
 	//"strings"
@@ -40,12 +40,10 @@ import (
 	"testing"
 )
 
-
 var SUBNET_CONFIG = "subnetconfig"
 var SUBNET_NS = "ibm_namespace"
 
 const annDynamicallyProvisioned = "pv.kubernetes.io/provisioned-by"
-
 
 func TestAttachVolume(t *testing.T) {
 
@@ -158,7 +156,7 @@ func TestValidate(t *testing.T) {
 	clientset = fake.NewSimpleClientset(objs...)
 
 	err := Validate(pv)
-        assert.NotNil(t,err)
+	assert.NotNil(t, err)
 	os.RemoveAll("/host/etc/iscsi-portworx-volume.conf")
 
 }
