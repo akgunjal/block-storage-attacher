@@ -18,7 +18,8 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.ibm.com/alchemy-containers/armada-storage-e2e/framework"
+	"github.ibm.com/alchemy-containers/block-storage-attacher/tests/e2e/framework"
+	//"github.ibm.com/alchemy-containers/armada-storage-e2e/framework"
 	clientset "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api/v1"
 	"os"
@@ -32,7 +33,7 @@ var (
 	clusterName   = ""
 	pvfilepath    = ""
 	pv            *v1.PersistentVolume
-	e2epath       = "src/github.ibm.com/alchemy-containers/armada-storage-e2e/e2e-tests/"
+	e2epath       = "src/github.ibm.com/alchemy-containers/block-storage-attacher/tests/e2e/e2e-tests/"
 	pvscriptpath  = ""
 	ymlscriptpath = ""
 	ymlgenpath    = ""
@@ -57,7 +58,7 @@ var _ = framework.KubeDescribe("[Feature:PortWorxE2E]", func() {
 			gopath := os.Getenv("GOPATH")
 			clusterName, err := getCluster(gopath + "/" + ymlgenpath)
 			Expect(err).NotTo(HaveOccurred())
-			pvfilepath = gopath + "/" + e2epath + "/pv-" + clusterName + ".yaml"
+			pvfilepath = gopath + "/" + e2epath + "pv-" + clusterName + ".yaml"
 			filestatus, err := fileExists(pvfilepath)
 			if filestatus == true {
 				os.Remove(pvfilepath)
@@ -90,25 +91,23 @@ var _ = framework.KubeDescribe("[Feature:PortWorxE2E]", func() {
 				pvname = pvnamestring[0]
 				pv, err = c.Core().PersistentVolumes().Get(pvname)
 				Expect(err).NotTo(HaveOccurred())
+                                
+                                attachStatus := "attaching"
+                                for  true  {
+                                  attachStatus = pv.ObjectMeta.Annotations["ibm.io/attachstatus"]
+                                  if attachStatus  == "attached"  || attachStatus  == "failed" {
+                                         break
+                                  } 
+                               } 
 
-				Expect(pv.ObjectMeta.Annotations["ibm.io/dm"]).To(Equal("/dev/dm-0"))
-				Expect(pv.ObjectMeta.Annotations["ibm.io/attachstatus"]).To(Equal("success"))
+				Expect(pv.ObjectMeta.Annotations["ibm.io/dm"]).To(ContainElement("/dev/dm-"))
+				Expect(attachStatus).To(Equal("attached"))
 			}
 
-			/* Static PV deletion */
+			/* Volume deletion */
 
-			By("Static PV  ")
+			By("Volume Deletion  ")
 			volumeid = pv.ObjectMeta.Annotations["ibm.io/volID"]
-			fmt.Printf("volumeid:\n%s\n", volumeid)
-			err = c.Core().PersistentVolumes().Delete(pvname, nil)
-			Expect(err).NotTo(HaveOccurred())
-			filestatus, err = fileExists(pvfilepath)
-			if filestatus == true {
-				os.Remove(pvfilepath)
-			}
-
-			/* Volume Deletion */
-
 			volidarg := fmt.Sprintf("%s", volumeid)
 			cmd = exec.Command(pvscriptpath, volidarg, "voldelete")
 			var stdout, stderr bytes.Buffer
@@ -118,6 +117,16 @@ var _ = framework.KubeDescribe("[Feature:PortWorxE2E]", func() {
 			Expect(err).NotTo(HaveOccurred())
 			outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
 			fmt.Printf("out:\n%s\nerr:\n%s\n", outStr, errStr)
+
+			/* Stativ PV  Deletion */
+
+			By("Static PV Deletion ")
+			err = c.Core().PersistentVolumes().Delete(pvname, nil)
+			Expect(err).NotTo(HaveOccurred())
+			filestatus, err = fileExists(pvfilepath)
+			if filestatus == true {
+				os.Remove(pvfilepath)
+			}
 
 		})
 	})
