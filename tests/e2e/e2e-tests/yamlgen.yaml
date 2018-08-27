@@ -1,5 +1,5 @@
-cluster:  xxxxxxx           #  name of IKS cluster
-region:   xxxxxxxx           #  cluster region
+cluster:  muraliportworx           #  name of IKS cluster
+region:   us-south           #  cluster region
 type:  endurance          #  performance | endurance
 offering: storage_as_a_service   #  storage_as_a_service | enterprise | performance
 # performance:
