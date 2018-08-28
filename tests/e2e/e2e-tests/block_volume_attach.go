@@ -38,8 +38,8 @@ var (
 	ymlscriptpath = ""
 	ymlgenpath    = ""
 )
-var _ = framework.KubeDescribe("[Feature:PortWorxE2E]", func() {
-	f := framework.NewDefaultFramework("armada-portworx")
+var _ = framework.KubeDescribe("[Feature:Block_Volume_Attach_E2E]", func() {
+	f := framework.NewDefaultFramework("block-volume-attach")
 	// filled in BeforeEach
 	var c clientset.Interface
 	var ns string
@@ -52,8 +52,8 @@ var _ = framework.KubeDescribe("[Feature:PortWorxE2E]", func() {
 		ymlgenpath = e2epath + "yamlgen.yaml"
 	})
 
-	framework.KubeDescribe("PortWorx E2E ", func() {
-		It("Port Worx E2e Testcases", func() {
+	framework.KubeDescribe("Block_Volume_Attach E2E ", func() {
+		It("Block Volume attach E2e Testcases", func() {
 			By("Volume Creation")
 			gopath := os.Getenv("GOPATH")
 			clusterName, err := getCluster(gopath + "/" + ymlgenpath)
@@ -103,6 +103,13 @@ var _ = framework.KubeDescribe("[Feature:PortWorxE2E]", func() {
 				Expect(pv.ObjectMeta.Annotations["ibm.io/dm"]).To(ContainElement("/dev/dm-"))
 				Expect(attachStatus).To(Equal("attached"))
 			}
+			
+
+                        /* Stativ PV  Deletion */
+
+			By("Static PV Deletion ")
+			err = c.Core().PersistentVolumes().Delete(pvname, nil)
+			Expect(err).NotTo(HaveOccurred())
 
 			/* Volume deletion */
 
@@ -118,11 +125,6 @@ var _ = framework.KubeDescribe("[Feature:PortWorxE2E]", func() {
 			outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
 			fmt.Printf("out:\n%s\nerr:\n%s\n", outStr, errStr)
 
-			/* Stativ PV  Deletion */
-
-			By("Static PV Deletion ")
-			err = c.Core().PersistentVolumes().Delete(pvname, nil)
-			Expect(err).NotTo(HaveOccurred())
 			filestatus, err = fileExists(pvfilepath)
 			if filestatus == true {
 				os.Remove(pvfilepath)
