@@ -20,11 +20,13 @@ import (
 	"fmt"
 	"github.ibm.com/alchemy-containers/block-storage-attacher/tests/e2e/framework"
 	//"github.ibm.com/alchemy-containers/armada-storage-e2e/framework"
+	"errors"
 	clientset "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api/v1"
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 var (
@@ -91,21 +93,14 @@ var _ = framework.KubeDescribe("[Feature:Block_Volume_Attach_E2E]", func() {
 				pvname = pvnamestring[0]
 				pv, err = c.Core().PersistentVolumes().Get(pvname)
 				Expect(err).NotTo(HaveOccurred())
-                                
-                                attachStatus := "attaching"
-                                for  true  {
-                                  attachStatus = pv.ObjectMeta.Annotations["ibm.io/attachstatus"]
-                                  if attachStatus  == "attached"  || attachStatus  == "failed" {
-                                         break
-                                  } 
-                               } 
+				attachStatus, err := getAttchStatus()
+				Expect(err).NotTo(HaveOccurred())
 
 				Expect(pv.ObjectMeta.Annotations["ibm.io/dm"]).To(ContainElement("/dev/dm-"))
 				Expect(attachStatus).To(Equal("attached"))
 			}
-			
 
-                        /* Stativ PV  Deletion */
+			/* Stativ PV  Deletion */
 
 			By("Static PV Deletion ")
 			err = c.Core().PersistentVolumes().Delete(pvname, nil)
@@ -141,6 +136,19 @@ func fileExists(filename string) (bool, error) {
 		}
 	}
 	return true, nil
+}
+
+func getAttchStatus() (string, error) {
+	attachStatus := "attaching"
+	err := errors.New("Timed out in PV creation")
+	for start := time.Now(); time.Since(start) < (10 * time.Minute); {
+		attachStatus = pv.ObjectMeta.Annotations["ibm.io/attachstatus"]
+		if attachStatus == "attached" || attachStatus == "failed" {
+			return attachStatus, nil
+			break
+		}
+	}
+	return attachStatus, err
 }
 
 func getCluster(filename string) (string, error) {
