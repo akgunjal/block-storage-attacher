@@ -145,7 +145,6 @@ func getAttchStatus() (string, error) {
 		attachStatus = pv.ObjectMeta.Annotations["ibm.io/attachstatus"]
 		if attachStatus == "attached" || attachStatus == "failed" {
 			return attachStatus, nil
-			break
 		}
 	}
 	return attachStatus, err
