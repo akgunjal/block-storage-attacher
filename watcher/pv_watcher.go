@@ -36,7 +36,7 @@ const (
 	ATTACH       = "attach"
 	DETACH       = "detach"
 
-	STORAGECLASS     = "pxclass"
+	STORAGECLASS     = "ibmc-block-attacher"
 	STATUS_ATTACHING = "attaching"
 	STATUS_ATTACHED  = "attached"
 	STATUS_FAILED    = "failed"
