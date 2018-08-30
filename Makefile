@@ -10,8 +10,8 @@
 IMAGE = registry.ng.bluemix.net/akgunjal/armada-block-volume-attacher
 #registry.ng.bluemix.net/akgunjal/armada-storage-portworx-volume-attacher
 #armada-master/armada-storage-portworx-volume-attacher
-GOPACKAGES=$(shell go list ./... | grep -v /vendor/ | grep -v /cmd)
-GOFILES=$(shell find . -type f -name '*.go' -not -path "./vendor/*")
+GOPACKAGES=$(shell go list ./... | grep -v /vendor/ | grep -v /cmd | grep -v /tests )
+GOFILES=$(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./tests/e2e/*")
 VERSION := latest
 SYSTEMUTIL_DIR=vendor/github.ibm.com/alchemy-containers/ibmc-storage-common-resources-lib
 
