@@ -85,6 +85,7 @@ imports:
 - name: github.com/spf13/pflag
   version: 9ff6c6923cfffbcd502984b8e0c80539a94968b7
 - name: github.ibm.com/alchemy-containers/armada-opensource-lib
+  repo: git@github.ibm.com:alchemy-containers/armada-opensource-lib.git
   version: fd1a7be252d2029a72632feef96d13856f3b78a2
   subpackages:
   - utils
