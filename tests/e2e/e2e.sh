@@ -78,11 +78,11 @@ echo "Kubeclient has been configured successfully to access the cluster"
 #fi
 
 # Install helm chart (if configured). During dev-test, user might skip this, if doesn't want an override
-if [[ $TEST_HELM_INSTALL == "true" ]]; then
-	install_block_plugin
-	check_deployment_state "ibmcloud-block-storage-plugin" 
-	#check_daemonset_state "ibmcloud-block-storage-driver"
-fi
+#if [[ $TEST_HELM_INSTALL == "true" ]]; then
+#	install_block_plugin
+#	check_deployment_state "ibmcloud-block-storage-plugin" 
+#	#check_daemonset_state "ibmcloud-block-storage-driver"
+#fi
 
 # Build binary (if configured), Otherwise conf must have the binary file location
 if [[ $TEST_CODE_BUILD == "true" ]]; then
