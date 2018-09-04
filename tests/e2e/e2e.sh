@@ -87,13 +87,13 @@ fi
 # Build binary (if configured), Otherwise conf must have the binary file location
 if [[ $TEST_CODE_BUILD == "true" ]]; then
 	cd $BLOCK_PLUGIN_HOME
-	make test-binary-build-e2e
+	make KUBECONFIGPATH=$KUBECONFIG PVG_PHASE=$PVG_PHASE armada-portworx-e2e-test
 	echo "E2E test binary was created successfully"
 fi
 
 echo "Starting ibmcloud block storage plugin e2e tests "
 # Call the go binary
-$E2E_TEST_BINARY -kubeconfig $KUBECONFIG
+#$E2E_TEST_BINARY -kubeconfig $KUBECONFIG
 echo "Finished ibmcloud block storage plugin e2e tests"
 
 exit 0
