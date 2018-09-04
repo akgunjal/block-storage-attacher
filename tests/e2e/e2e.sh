@@ -87,6 +87,7 @@ echo "Kubeclient has been configured successfully to access the cluster"
 # Build binary (if configured), Otherwise conf must have the binary file location
 if [[ $TEST_CODE_BUILD == "true" ]]; then
 	cd $BLOCK_PLUGIN_HOME
+        make deps
 	make KUBECONFIGPATH=$KUBECONFIG PVG_PHASE=$PVG_PHASE armada-portworx-e2e-test
 	echo "E2E test binary was created successfully"
 fi
