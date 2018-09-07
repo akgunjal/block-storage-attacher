@@ -16,6 +16,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"/scripts
 
 # Do a bx login, user can also opt to skip this during dev-test
 if [[ $TEST_BLUEMIX_LOGIN == "true" ]]; then
+        echo "Bluemix Login DOne"
 	bx_login
 fi
 
