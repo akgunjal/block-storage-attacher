@@ -89,6 +89,8 @@ echo "Kubeclient has been configured successfully to access the cluster"
 if [[ $TEST_CODE_BUILD == "true" ]]; then
 	cd $BLOCK_PLUGIN_HOME
         make deps
+        bx cs credentials-set  --infrastructure-username  $PVG_SL_USERNAME  --infrastructure-api-key $PVG_SL_API_KEY
+        bx sl init -u   $PVG_SL_USERNAME  -p  $PVG_SL_API_KEY
 	make KUBECONFIGPATH=$KUBECONFIG PVG_PHASE=$PVG_PHASE armada-portworx-e2e-test
 	echo "E2E test binary was created successfully"
 fi
