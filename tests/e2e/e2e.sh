@@ -96,8 +96,8 @@ if [[ $TEST_CODE_BUILD == "true" ]]; then
         bx sl init -u   $PVG_SL_USERNAME  -p  $PVG_SL_API_KEY
          bx cs init --host  $ARMADA_API_ENDPOINT
 	setKubeConfig $PVG_CLUSTER_CRUISER
-        sed -i '/certificate-authority: ca-wdc06-ibmc-block-e2e-test.pem/c\    certificate-authority: \/root/.bluemix/plugins/container-service/clusters/ibmc-block-e2e-test/ca-wdc06-ibmc-block-e2e-test.pem' $KUBECONFIG
         export API_SERVER=$(kubectl config view | grep server | cut -f 2- -d ":" | tr -d " ")
+        sed -i '/certificate-authority: ca-wdc06-ibmc-block-e2e-test.pem/c\    certificate-authority: \/root/.bluemix/plugins/container-service/clusters/ibmc-block-e2e-test/ca-wdc06-ibmc-block-e2e-test.pem' $KUBECONFIG
 	make KUBECONFIGPATH=$KUBECONFIG PVG_PHASE=$PVG_PHASE armada-portworx-e2e-test
 	echo "E2E test binary was created successfully"
 fi
