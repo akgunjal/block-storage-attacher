@@ -99,6 +99,8 @@ if [[ $TEST_CODE_BUILD == "true" ]]; then
         export API_SERVER=$(kubectl config view | grep server | cut -f 2- -d ":" | tr -d " ")
         sed -i '/certificate-authority: ca-mon01-ibmc-blockvolume-e2e-test.pem/c\    certificate-authority: \/root/.bluemix/plugins/container-service/clusters/ibmc-blockvolume-e2e-test/ca-mon01-ibmc-blockvolume-e2e-test.pem' $KUBECONFIG
 	cat $KUBECONFIG
+        echo "Bluemix COnfig"
+        cat ~/.bluemix/config.json
 	make KUBECONFIGPATH=$KUBECONFIG PVG_PHASE=$PVG_PHASE armada-portworx-e2e-test
 	echo "E2E test binary was created successfully"
 fi
