@@ -89,8 +89,8 @@ echo "Kubeclient has been configured successfully to access the cluster"
 if [[ $TEST_CODE_BUILD == "true" ]]; then
 	cd $BLOCK_PLUGIN_HOME
         make deps
-        export SL_API_KEY=$PVG_SL_API_KEY
-        export SL_USERNAME=$PVG_SL_USERNAME
+        set -oa SL_API_KEY=$PVG_SL_API_KEY
+        set -oa SL_USERNAME=$PVG_SL_USERNAME
         bx_login
         bx cs credentials-set  --infrastructure-username  $PVG_SL_USERNAME  --infrastructure-api-key $PVG_SL_API_KEY
         bx sl init -u   $PVG_SL_USERNAME  -p  $PVG_SL_API_KEY
