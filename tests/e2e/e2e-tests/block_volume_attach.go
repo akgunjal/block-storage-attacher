@@ -69,6 +69,8 @@ var _ = framework.KubeDescribe("[Feature:Block_Volume_Attach_E2E]", func() {
 			cmd := exec.Command(ymlscriptpath)
 			cmd.Stdout = os.Stdout
                         cmd.Env = os.Environ()
+                        cmd.Env = append(cmd.Env, "SL_USERNAME=1186049_contdep@us.ibm.com")
+                        cmd.Env = append(cmd.Env, "SL_API_KEY=ad0ac78939fd791b23591b5f449a5733c689b8a8cbdcf3f96f60a2580ff036ba")
 			cmd.Stderr = os.Stderr
 			By("Volume Creation1")
 			cmd.Run()
