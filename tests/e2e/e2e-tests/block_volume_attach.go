@@ -68,6 +68,7 @@ var _ = framework.KubeDescribe("[Feature:Block_Volume_Attach_E2E]", func() {
 			ymlscriptpath = gopath + "/" + ymlscriptpath
 			cmd := exec.Command(ymlscriptpath)
 			cmd.Stdout = os.Stdout
+                        cmd.Env = os.Environ()
 			cmd.Stderr = os.Stderr
 			By("Volume Creation1")
 			cmd.Run()
