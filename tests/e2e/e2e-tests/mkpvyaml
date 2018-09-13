@@ -96,8 +96,10 @@ def get_instances(cluster):
         contents = json.load(urllib.request.urlopen(request))
     except:
         print ("Unable to get cluster workers.  Are you logged in (\"bx login\")?  Does " + cluster + " actually exist?  Are your credentials set?")
-        traceback.print_exc()
-        traceback.print_tb(err.__traceback__)
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        traceback.print_exception(exc_type, exc_value, exc_traceback,
+                              limit=2, file=sys.stdout)
+        #traceback.print_tb(err.__traceback__)
         sys.exit(-1)
     
     for row in contents:
