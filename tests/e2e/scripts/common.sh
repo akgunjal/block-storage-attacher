@@ -453,29 +453,29 @@ function check_daemonset_state {
   done
 }
 
-# Install/Upgrade block-plugin helm chart
-function install_block_plugin {
+# Install/Upgrade blockvlome-attacher helm chart
+function install_blockvolume_plugin {
 	if [ -z $HELM_CHART ]; then
         echo "helm chart not found. Hence exiting"
         exit 1
     fi
-    echo "Installing helm chart ibmcloud-block-storage-plugin .."
+    echo "Installing helm chart ibmcloud-blockvolume-attacher-plugin .."
 	# INSTALL HELM TILLER (Attempt again, if already installed)
 	echo "Initialize tiller AND Wait till running"
 	helm init --upgrade
 	check_pod_state "tiller-deploy"
 
 	# INSTALL/UPGRADE HELM CHART
-	helm_values_override="--set image.repository=$IMAGE_REGISTRY/$USER_NAMESPACE/$PLUGIN_IMAGE --set image.pluginBuild=$PLUGIN_BUILD --set image.flexrepository=$IMAGE_REGISTRY/$USER_NAMESPACE/$DRIVER_IMAGE --set image.driverBuild=$DRIVER_BUILD"
+	helm_values_override="--set image.repository=$IMAGE_REGISTRY/$USER_NAMESPACE/$PLUGIN_IMAGE --set image.pluginBuild=$PLUGIN_BUILD"
 	helm_install_cmd="helm install $helm_values_override $HELM_CHART"
 
 	# CHECK FOR UPGRADE
-	echo "Checking for existing helm chart ibmcloud-block-storage-plugin on cluster .."
-	helm_release=$(helm ls | grep DEPLOYED | awk "/ibmcloud-block-storage-plugin/"'{print $1}')
-	if [   "$helm_release" != "" ]; then
-	  echo "Existing release $helm_release found for chart ibmcloud-block-storage-plugin"
-	  helm_install_cmd="helm upgrade --force --recreate-pods $helm_values_override $helm_release $HELM_CHART"
-	fi
+#	echo "Checking for existing helm chart ibmcloud-blockvolume-storage-plugin on cluster .."
+#	helm_release=$(helm ls | grep DEPLOYED | awk "/ibmcloud-block-storage-plugin/"'{print $1}')
+#	if [   "$helm_release" != "" ]; then
+#	  echo "Existing release $helm_release found for chart ibmcloud-block-storage-plugin"
+#	  helm_install_cmd="helm upgrade --force --recreate-pods $helm_values_override $helm_release $HELM_CHART"
+#	fi
 
 	# DO HELM INSTALLATION
 	echo "Executing: $helm_install_cmd"

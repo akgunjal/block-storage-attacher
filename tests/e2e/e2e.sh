@@ -79,11 +79,11 @@ echo "Kubeclient has been configured successfully to access the cluster"
 #fi
 
 # Install helm chart (if configured). During dev-test, user might skip this, if doesn't want an override
-#if [[ $TEST_HELM_INSTALL == "true" ]]; then
-#	install_block_plugin
-#	check_deployment_state "ibmcloud-block-storage-plugin" 
-#	#check_daemonset_state "ibmcloud-block-storage-driver"
-#fi
+if [[ $TEST_HELM_INSTALL == "true" ]]; then
+	install_block_plugin
+	check_deployment_state "ibmcloud-block-storage-plugin" 
+	#check_daemonset_state "ibmcloud-block-storage-driver"
+fi
 
 # Build binary (if configured), Otherwise conf must have the binary file location
 if [[ $TEST_CODE_BUILD == "true" ]]; then
@@ -95,7 +95,7 @@ if [[ $TEST_CODE_BUILD == "true" ]]; then
         bx_login
         bx cs credentials-set  --infrastructure-username  $PVG_SL_USERNAME  --infrastructure-api-key $PVG_SL_API_KEY
         bx sl init -u   $PVG_SL_USERNAME  -p  $PVG_SL_API_KEY
-         bx cs init --host  $ARMADA_API_ENDPOINT
+        bx cs init --host  $ARMADA_API_ENDPOINT
 	setKubeConfig $PVG_CLUSTER_CRUISER
         export API_SERVER=$(kubectl config view | grep server | cut -f 2- -d ":" | tr -d " ")
         sed -i '/certificate-authority: ca-mon01-ibmc-blockvolume-e2e-test.pem/c\    certificate-authority: \/root/.bluemix/plugins/container-service/clusters/ibmc-blockvolume-e2e-test/ca-mon01-ibmc-blockvolume-e2e-test.pem' $KUBECONFIG
