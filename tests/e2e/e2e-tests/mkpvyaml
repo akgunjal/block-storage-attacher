@@ -94,9 +94,10 @@ def get_instances(cluster):
     try:
         request = urllib.request.Request(url="https://containers.bluemix.net/v1/clusters/" + cluster + "/workers" , headers=headers)
         f = urllib.request.urlopen(request)
-        print(f.read().decode('utf-8'))
-        #contents = json.load(urllib.request.urlopen(request))
-        contents = json.load(f.read().decode('utf-8'))
+        response = f.read().decode('utf-8')
+        print(response)
+        #contents = json.load(f)
+        contents = json.loads(response)
     except:
         print ("Unable to get cluster workers.  Are you logged in (\"bx login\")?  Does " + cluster + " actually exist?  Are your credentials set?")
         exc_type, exc_value, exc_traceback = sys.exc_info()
