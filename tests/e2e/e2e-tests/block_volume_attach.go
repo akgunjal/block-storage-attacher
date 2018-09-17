@@ -90,8 +90,9 @@ var _ = framework.KubeDescribe("[Feature:Block_Volume_Attach_E2E]", func() {
 				cmd.Stderr = &stderr
 				err := cmd.Run()
 				Expect(err).NotTo(HaveOccurred())
-				outStr, _ := string(stdout.Bytes()), string(stderr.Bytes())
+				outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
 				pvstring := strings.Split(outStr, "/")
+			        fmt.Printf("Murali :\n%s\nerr:\n%s\n", outStr, errStr)
 				pvnamestring := strings.Split(pvstring[1], " ")
 				pvname = pvnamestring[0]
 				pv, err = c.Core().PersistentVolumes().Get(pvname)
