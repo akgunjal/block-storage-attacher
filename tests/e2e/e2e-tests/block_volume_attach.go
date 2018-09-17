@@ -90,11 +90,20 @@ var _ = framework.KubeDescribe("[Feature:Block_Volume_Attach_E2E]", func() {
 				cmd.Stderr = &stderr
 				err := cmd.Run()
 				Expect(err).NotTo(HaveOccurred())
-				outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
-				pvstring := strings.Split(outStr, "/")
-			        fmt.Printf("Murali :\n%s\nerr:\n%s\n", outStr, errStr)
-				pvnamestring := strings.Split(pvstring[1], " ")
-				pvname = pvnamestring[0]
+				outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())a
+                                if strings.Contains(outStr, "/") {
+				     pvstring := strings.Split(outStr, "/")
+			             fmt.Printf("Murali :\n%s\nerr:\n%s\n", outStr, errStr)
+				     pvnamestring := strings.Split(pvstring[1], " ")a
+				     pvname = pvnamestring[0]
+			             fmt.Printf("Murali :\n%s\n", pvname)
+                                } else {
+                                      pvstring := strings.Split(outStr, " ")
+			              fmt.Printf("Murali :\n%s\nerr:\n%s\n", outStr, errStr)
+                                      pvname = strings.Trim(pvstring[1], "\"")
+			             fmt.Printf("Murali :\n%s\n", pvname)
+                                }
+                                      
 				pv, err = c.Core().PersistentVolumes().Get(pvname)
 				Expect(err).NotTo(HaveOccurred())
 				attachStatus, err := getAttchStatus()
