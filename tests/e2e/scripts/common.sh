@@ -415,14 +415,14 @@ function check_deployment_state {
   deployment_name=$1
   while true; do
     attempts=$((attempts+1))
-    deployment_status=$(kubectl get deployment -n kube-system | awk "/$deployment_name/"'{print $5}')
+    deployment_status=$(kubectl get pods -n kube-system | awk "/$deployment_name/"'{print $1}')
     if [   "$deployment_status" = "1" ]; then
       echo "$deployment_name is  running ."
       break
     fi
     if [[ $attempts -gt 30 ]]; then
       echo "$deployment_name  were not running well."
-      kubectl get deployment -n kube-system| awk "/$deployment_name/"
+      kubectl get pods -n kube-system| awk "/$deployment_name/"
       exit 1
     fi
     echo "$deployment_name state == $deployment_status  Sleeping 10 seconds"
