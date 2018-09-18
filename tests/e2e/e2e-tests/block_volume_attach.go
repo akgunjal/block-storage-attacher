@@ -108,11 +108,11 @@ var _ = framework.KubeDescribe("[Feature:Block_Volume_Attach_E2E]", func() {
 				Expect(err).NotTo(HaveOccurred())
                                 fmt.Printf("Annotaitons :\n%s\n", pv.ObjectMeta.Annotations["ibm.io/attachstatus"])
                                 fmt.Printf("Annotaitons ibm.io/dm:\n%s\n", pv.ObjectMeta.Annotations["ibm.io/dm"])
-				//attachStatus, err := getAttchStatus()
-				//Expect(err).NotTo(HaveOccurred())
+				attachStatus, err := getAttchStatus()
+				Expect(err).NotTo(HaveOccurred())
 
-				//Expect(pv.ObjectMeta.Annotations["ibm.io/dm"]).To(ContainElement("/dev/dm-"))
-				//Expect(attachStatus).To(Equal("attached"))
+				Expect(pv.ObjectMeta.Annotations["ibm.io/dm"]).To(ContainElement("/dev/dm-"))
+				Expect(attachStatus).To(Equal("attached"))
 			}
 
 			/* Stativ PV  Deletion */
