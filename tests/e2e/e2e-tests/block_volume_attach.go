@@ -90,7 +90,7 @@ var _ = framework.KubeDescribe("[Feature:Block_Volume_Attach_E2E]", func() {
 				cmd.Stderr = &stderr
 				err := cmd.Run()
 				Expect(err).NotTo(HaveOccurred())
-				outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
+				outStr, _ := string(stdout.Bytes()), string(stderr.Bytes())
 				if strings.Contains(outStr, "/") {
 					pvstring := strings.Split(outStr, "/")
 					pvnamestring := strings.Split(pvstring[1], " ")
