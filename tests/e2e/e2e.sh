@@ -71,12 +71,6 @@ addFullPathToCertsInKubeConfig
 cat $KUBECONFIG
 echo "Kubeclient has been configured successfully to access the cluster"
 
-# Build Latest plugin images (if configured), otherwise use the existing one specified in conf
-#if [[ $TEST_LATEST_IMAGE_BUILD == "true" ]]; then
-#	cd $BLOCK_PLUGIN_HOME
-#	make plugin-build-e2e
-#	echo "Image build was successful"
-#fi
 
 # Install helm chart (if configured). During dev-test, user might skip this, if doesn't want an override
 if [[ $TEST_HELM_INSTALL == "true" ]]; then

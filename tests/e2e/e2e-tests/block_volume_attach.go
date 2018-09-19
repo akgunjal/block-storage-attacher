@@ -68,9 +68,9 @@ var _ = framework.KubeDescribe("[Feature:Block_Volume_Attach_E2E]", func() {
 			ymlscriptpath = gopath + "/" + ymlscriptpath
 			cmd := exec.Command(ymlscriptpath)
 			cmd.Stdout = os.Stdout
-                        cmd.Env = os.Environ()
-                        cmd.Env = append(cmd.Env, "SL_USERNAME=1186049_contdep@us.ibm.com")
-                        cmd.Env = append(cmd.Env, "SL_API_KEY=ad0ac78939fd791b23591b5f449a5733c689b8a8cbdcf3f96f60a2580ff036ba")
+			cmd.Env = os.Environ()
+			//cmd.Env = append(cmd.Env, "SL_USERNAME=1186049_contdep@us.ibm.com")
+			//cmd.Env = append(cmd.Env, "SL_API_KEY=ad0ac78939fd791b23591b5f449a5733c689b8a8cbdcf3f96f60a2580ff036ba")
 			cmd.Stderr = os.Stderr
 			By("Volume Creation1")
 			cmd.Run()
@@ -91,19 +91,19 @@ var _ = framework.KubeDescribe("[Feature:Block_Volume_Attach_E2E]", func() {
 				err := cmd.Run()
 				Expect(err).NotTo(HaveOccurred())
 				outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
-                                if strings.Contains(outStr, "/") {
-				     pvstring := strings.Split(outStr, "/")
-				     pvnamestring := strings.Split(pvstring[1], " ")
-				     pvname = pvnamestring[0]
-                                } else {
-                                      pvstring := strings.Split(outStr, " ")
-                                      pvname = strings.Trim(pvstring[1], "\"")
-                                }
-                                      
+				if strings.Contains(outStr, "/") {
+					pvstring := strings.Split(outStr, "/")
+					pvnamestring := strings.Split(pvstring[1], " ")
+					pvname = pvnamestring[0]
+				} else {
+					pvstring := strings.Split(outStr, " ")
+					pvname = strings.Trim(pvstring[1], "\"")
+				}
+
 				pv, err = c.Core().PersistentVolumes().Get(pvname)
 				Expect(err).NotTo(HaveOccurred())
-                                fmt.Printf("Annotaitons :\n%s\n", pv.ObjectMeta.Annotations["ibm.io/attachstatus"])
-                                fmt.Printf("Annotaitons ibm.io/iqn:\n%s\n", pv.ObjectMeta.Annotations["ibm.io/iqn"])
+				fmt.Printf("Annotaitons :\n%s\n", pv.ObjectMeta.:Annotations["ibm.io/attachstatus"])
+				fmt.Printf("Annotaitons ibm.io/dm:\n%s\n", pv.ObjectMeta.Annotations["ibm.io/dm"])
 				//attachStatus, err := getAttchStatus()
 				//Expect(err).NotTo(HaveOccurred())
 
@@ -151,11 +151,12 @@ func fileExists(filename string) (bool, error) {
 
 func getAttchStatus() (string, error) {
 	attachStatus := "attaching"
+	pv, err := c.Core().PersistentVolumes().Get(pvname)
 	err := errors.New("Timed out in PV creation")
 	for start := time.Now(); time.Since(start) < (5 * time.Minute); {
 		attachStatus = pv.ObjectMeta.Annotations["ibm.io/attachstatus"]
-                fmt.Printf("attachStatus :\n%s\n", attachStatus)
-                fmt.Printf("Annotaitons :\n%s\n", pv.ObjectMeta.Annotations["ibm.io/attachstatus"])
+		fmt.Printf("attachStatus :\n%s\n", attachStatus)
+		fmt.Printf("Annotaitons :\n%s\n", pv.ObjectMeta.Annotations["ibm.io/attachstatus"])
 		if attachStatus == "attached" || attachStatus == "failed" {
 			return attachStatus, nil
 		}
