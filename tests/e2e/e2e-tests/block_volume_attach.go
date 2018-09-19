@@ -152,7 +152,7 @@ func fileExists(filename string) (bool, error) {
 func getAttchStatus() (string, error) {
 	attachStatus := "attaching"
 //	pv, _ = c.Core().PersistentVolumes().Get(pvname)
-	err = errors.New("Timed out in PV creation")
+	err := errors.New("Timed out in PV creation")
 	for start := time.Now(); time.Since(start) < (5 * time.Minute); {
 		attachStatus = pv.ObjectMeta.Annotations["ibm.io/attachstatus"]
 		fmt.Printf("attachStatus :\n%s\n", attachStatus)
