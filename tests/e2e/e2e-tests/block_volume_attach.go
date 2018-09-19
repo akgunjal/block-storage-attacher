@@ -102,7 +102,7 @@ var _ = framework.KubeDescribe("[Feature:Block_Volume_Attach_E2E]", func() {
 
 				pv, err = c.Core().PersistentVolumes().Get(pvname)
 				Expect(err).NotTo(HaveOccurred())
-				fmt.Printf("Annotaitons :\n%s\n", pv.ObjectMeta.:Annotations["ibm.io/attachstatus"])
+				fmt.Printf("Annotaitons :\n%s\n", pv.ObjectMeta.Annotations["ibm.io/attachstatus"])
 				fmt.Printf("Annotaitons ibm.io/dm:\n%s\n", pv.ObjectMeta.Annotations["ibm.io/dm"])
 				//attachStatus, err := getAttchStatus()
 				//Expect(err).NotTo(HaveOccurred())
