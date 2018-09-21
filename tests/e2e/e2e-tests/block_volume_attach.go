@@ -39,11 +39,11 @@ var (
 	pvscriptpath  = ""
 	ymlscriptpath = ""
 	ymlgenpath    = ""
+        c clientset.Interface
 )
 var _ = framework.KubeDescribe("[Feature:Block_Volume_Attach_E2E]", func() {
 	f := framework.NewDefaultFramework("block-volume-attach")
 	// filled in BeforeEach
-	var c clientset.Interface
 	var ns string
 
 	BeforeEach(func() {
@@ -102,13 +102,11 @@ var _ = framework.KubeDescribe("[Feature:Block_Volume_Attach_E2E]", func() {
 
 				pv, err = c.Core().PersistentVolumes().Get(pvname)
 				Expect(err).NotTo(HaveOccurred())
-				fmt.Printf("Annotaitons :\n%s\n", pv.ObjectMeta.Annotations["ibm.io/attachstatus"])
-				fmt.Printf("Annotaitons ibm.io/dm:\n%s\n", pv.ObjectMeta.Annotations["ibm.io/dm"])
-				//attachStatus, err := getAttchStatus()
-				//Expect(err).NotTo(HaveOccurred())
+				attachStatus, err := getAttchStatus()
+				Expect(err).NotTo(HaveOccurred())
 
-				//Expect(pv.ObjectMeta.Annotations["ibm.io/dm"]).To(ContainElement("/dev/dm-"))
-				//Expect(attachStatus).To(Equal("attached"))
+				Expect(pv.ObjectMeta.Annotations["ibm.io/dm"]).To(ContainElement("/dev/dm-"))
+				Expect(attachStatus).To(Equal("attached"))
 			}
 
 			/* Stativ PV  Deletion */
@@ -151,12 +149,10 @@ func fileExists(filename string) (bool, error) {
 
 func getAttchStatus() (string, error) {
 	attachStatus := "attaching"
-//	pv, _ = c.Core().PersistentVolumes().Get(pvname)
 	err := errors.New("Timed out in PV creation")
 	for start := time.Now(); time.Since(start) < (5 * time.Minute); {
+		pv, _ = c.Core().PersistentVolumes().Get(pvname)
 		attachStatus = pv.ObjectMeta.Annotations["ibm.io/attachstatus"]
-		fmt.Printf("attachStatus :\n%s\n", attachStatus)
-		fmt.Printf("Annotaitons :\n%s\n", pv.ObjectMeta.Annotations["ibm.io/attachstatus"])
 		if attachStatus == "attached" || attachStatus == "failed" {
 			return attachStatus, nil
 		}
