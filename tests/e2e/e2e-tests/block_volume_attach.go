@@ -146,9 +146,10 @@ func fileExists(filename string) (bool, error) {
 func getAttchStatus() (string, error) {
 	attachStatus := "attaching"
 	err := errors.New("Timed out in PV creation")
-	for start := time.Now(); time.Since(start) < (5 * time.Minute); {
+	for start := time.Now(); time.Since(start) < (10 * time.Minute); {
 		pv, _ = c.Core().PersistentVolumes().Get(pvname)
 		attachStatus = pv.ObjectMeta.Annotations["ibm.io/attachstatus"]
+                time.Sleep(1 * time.Minute)
 		if attachStatus == "attached" || attachStatus == "failed" {
 			return attachStatus, nil
 		}
