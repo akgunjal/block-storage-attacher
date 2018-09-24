@@ -14,12 +14,10 @@ package e2e
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	//commontest "github.ibm.com/alchemy-containers/armada-storage-e2e/common"
 	"bufio"
 	"bytes"
 	"fmt"
 	"github.ibm.com/alchemy-containers/block-storage-attacher/tests/e2e/framework"
-	//"github.ibm.com/alchemy-containers/armada-storage-e2e/framework"
 	"errors"
 	clientset "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api/v1"
@@ -39,11 +37,11 @@ var (
 	pvscriptpath  = ""
 	ymlscriptpath = ""
 	ymlgenpath    = ""
+        c clientset.Interface
 )
 var _ = framework.KubeDescribe("[Feature:Block_Volume_Attach_E2E]", func() {
 	f := framework.NewDefaultFramework("block-volume-attach")
 	// filled in BeforeEach
-	var c clientset.Interface
 	var ns string
 
 	BeforeEach(func() {
@@ -68,6 +66,7 @@ var _ = framework.KubeDescribe("[Feature:Block_Volume_Attach_E2E]", func() {
 			ymlscriptpath = gopath + "/" + ymlscriptpath
 			cmd := exec.Command(ymlscriptpath)
 			cmd.Stdout = os.Stdout
+			cmd.Env = os.Environ()
 			cmd.Stderr = os.Stderr
 			By("Volume Creation1")
 			cmd.Run()
@@ -88,14 +87,19 @@ var _ = framework.KubeDescribe("[Feature:Block_Volume_Attach_E2E]", func() {
 				err := cmd.Run()
 				Expect(err).NotTo(HaveOccurred())
 				outStr, _ := string(stdout.Bytes()), string(stderr.Bytes())
-				pvstring := strings.Split(outStr, "/")
-				pvnamestring := strings.Split(pvstring[1], " ")
-				pvname = pvnamestring[0]
+				if strings.Contains(outStr, "/") {
+					pvstring := strings.Split(outStr, "/")
+					pvnamestring := strings.Split(pvstring[1], " ")
+					pvname = pvnamestring[0]
+				} else {
+					pvstring := strings.Split(outStr, " ")
+					pvname = strings.Trim(pvstring[1], "\"")
+				}
+
 				pv, err = c.Core().PersistentVolumes().Get(pvname)
 				Expect(err).NotTo(HaveOccurred())
 				attachStatus, err := getAttchStatus()
 				Expect(err).NotTo(HaveOccurred())
-
 				Expect(pv.ObjectMeta.Annotations["ibm.io/dm"]).To(ContainElement("/dev/dm-"))
 				Expect(attachStatus).To(Equal("attached"))
 			}
@@ -141,8 +145,10 @@ func fileExists(filename string) (bool, error) {
 func getAttchStatus() (string, error) {
 	attachStatus := "attaching"
 	err := errors.New("Timed out in PV creation")
-	for start := time.Now(); time.Since(start) < (10 * time.Minute); {
+	for start := time.Now(); time.Since(start) < (15 * time.Minute); {
+		pv, _ = c.Core().PersistentVolumes().Get(pvname)
 		attachStatus = pv.ObjectMeta.Annotations["ibm.io/attachstatus"]
+                time.Sleep(1 * time.Minute)
 		if attachStatus == "attached" || attachStatus == "failed" {
 			return attachStatus, nil
 		}

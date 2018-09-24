@@ -35,7 +35,7 @@
 
 import os
 import time
-import sys
+import sys, traceback
 import json
 import urllib.request
 from os.path import expanduser
@@ -93,9 +93,17 @@ def get_instances(cluster):
     
     try:
         request = urllib.request.Request(url="https://containers.bluemix.net/v1/clusters/" + cluster + "/workers" , headers=headers)
-        contents = json.load(urllib.request.urlopen(request))
+        f = urllib.request.urlopen(request)
+        response = f.read().decode('utf-8')
+        print(response)
+        #contents = json.load(f)
+        contents = json.loads(response)
     except:
         print ("Unable to get cluster workers.  Are you logged in (\"bx login\")?  Does " + cluster + " actually exist?  Are your credentials set?")
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        traceback.print_exception(exc_type, exc_value, exc_traceback,
+                              limit=2, file=sys.stdout)
+        #traceback.print_tb(err.__traceback__)
         sys.exit(-1)
     
     for row in contents:
@@ -177,13 +185,13 @@ kind: PersistentVolume
 metadata:
   name: %s-pv%s
   annotations:
-    ibm.io/volID: "%s"
     ibm.io/iqn: "%s"
     ibm.io/username: "%s"
     ibm.io/password: "%s"
     ibm.io/targetip: "%s"
     ibm.io/lunid: "%s"
     ibm.io/nodeip: "%s"
+    ibm.io/volID: "%s"
 spec:
   capacity:
     storage: %sGi
