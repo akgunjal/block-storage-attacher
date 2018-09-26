@@ -226,12 +226,14 @@ func UpdatePersistentVolume(volume config.Volume, pv *v1.PersistentVolume) {
 				line = space.ReplaceAllString(line, " ")
 				line_parts := strings.Split(string(line), " ")
 				lgr.Info("Line: ", zap.Strings("LINE", line_parts))
-				// Parse the LUN ID from output
-				lun := strings.Split(string(line_parts[1]), ":")
-				if len(lun) == 4 {
-					if lunid, _ = strconv.Atoi(lun[3]); lunid == volume.Lunid {
-						mpath = line_parts[0]
-						break
+				if len(line_parts) >= 2 {
+					// Parse the LUN ID from output
+					lun := strings.Split(string(line_parts[1]), ":")
+					if len(lun) == 4 {
+						if lunid, _ = strconv.Atoi(lun[3]); lunid == volume.Lunid {
+							mpath = line_parts[0]
+							break
+						}
 					}
 				}
 			}
