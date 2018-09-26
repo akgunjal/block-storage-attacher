@@ -100,7 +100,11 @@ var _ = framework.KubeDescribe("[Feature:Block_Volume_Attach_E2E]", func() {
 				Expect(err).NotTo(HaveOccurred())
 				attachStatus, err := getAttchStatus()
 				Expect(err).NotTo(HaveOccurred())
-				Expect(pv.ObjectMeta.Annotations["ibm.io/dm"]).To(ContainElement("/dev/dm-"))
+                                devicePath := pv.ObjectMeta.Annotations["ibm.io/dm"]
+                                if !strings.Contains(devicePath, "/dev/dm-") {
+                                       err := errors.New("Device path is not attached")
+                                       Expect(err).NotTo(HaveOccurred())
+                                }
 				Expect(attachStatus).To(Equal("attached"))
 			}
 
@@ -115,7 +119,9 @@ var _ = framework.KubeDescribe("[Feature:Block_Volume_Attach_E2E]", func() {
 			By("Volume Deletion  ")
 			volumeid = pv.ObjectMeta.Annotations["ibm.io/volID"]
 			volidarg := fmt.Sprintf("%s", volumeid)
-			cmd = exec.Command(pvscriptpath, volidarg, "voldelete")
+			nodeip = pv.ObjectMeta.Annotations["ibm.io/nodeip"]
+			nodeiparg := fmt.Sprintf("%s", nodeip)
+			cmd = exec.Command(pvscriptpath, volidarg, "voldelete", nodeiparg)
 			var stdout, stderr bytes.Buffer
 			cmd.Stdout = &stdout
 			cmd.Stderr = &stderr
