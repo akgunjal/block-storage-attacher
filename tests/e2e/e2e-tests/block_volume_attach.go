@@ -119,7 +119,7 @@ var _ = framework.KubeDescribe("[Feature:Block_Volume_Attach_E2E]", func() {
 			By("Volume Deletion  ")
 			volumeid = pv.ObjectMeta.Annotations["ibm.io/volID"]
 			volidarg := fmt.Sprintf("%s", volumeid)
-			nodeip = pv.ObjectMeta.Annotations["ibm.io/nodeip"]
+			nodeip := pv.ObjectMeta.Annotations["ibm.io/nodeip"]
 			nodeiparg := fmt.Sprintf("%s", nodeip)
 			cmd = exec.Command(pvscriptpath, volidarg, "voldelete", nodeiparg)
 			var stdout, stderr bytes.Buffer
