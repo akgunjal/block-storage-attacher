@@ -105,8 +105,8 @@ then
     exit 1
   fi
 
-  echo "`date`:multipath -r" >> $LOG
-  echo "`multipath -r`" >> $LOG
+#  echo "`date`:multipath -r" >> $LOG
+#  echo "`multipath -r`" >> $LOG
   echo "`date`:multipath -ll" >> $LOG
   echo "`multipath -ll`" >> $LOG
 
@@ -141,6 +141,6 @@ then
   echo "`echo 1 | tee /sys/block/$dm/slaves/*/device/delete`" >> $LOG
   multipath -f $mpath
   echo "`date`:Detached the volume successfully." >> $LOG
-  multipath -r
+#  multipath -r
   exit 0
 fi
