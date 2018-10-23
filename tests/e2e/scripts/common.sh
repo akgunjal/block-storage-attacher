@@ -466,7 +466,7 @@ function install_blockvolume_plugin {
 	check_pod_state "tiller-deploy"
 
 	# INSTALL/UPGRADE HELM CHART
-	helm_values_override="--set image.repository=$IMAGE_REGISTRY/$USER_NAMESPACE/$PLUGIN_IMAGE --set image.pluginBuild=$PLUGIN_BUILD"
+	helm_values_override="--set image.repository=$IMAGE_REGISTRY/$USER_NAMESPACE/$PLUGIN_IMAGE --set image.build=$PLUGIN_BUILD"
 	helm_install_cmd="helm install $helm_values_override $HELM_CHART"
 
 	# CHECK FOR UPGRADE
